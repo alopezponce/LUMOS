@@ -10,7 +10,7 @@ from database_config import engine
 
 def ingest_solar():
     hora_actual = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    print(f"[{hora_actual}] ☀️ Iniciando ingesta REAL de Fusion Solar...")
+    print(f"[{hora_actual}] Iniciando ingesta REAL de Fusion Solar...")
 
     # --- CONFIGURACIÓN HUAWEI ---
     user = os.getenv("FUSION_USER")
@@ -50,13 +50,13 @@ def ingest_solar():
 
             # 3. Guardado en PostgreSQL
             df.to_sql('solar_bronze', engine, if_exists='append', index=False)
-            print(f"✅ ¡Éxito! Se han guardado {len(df)} registros reales (producción y consumo) en 'solar_bronze'.")
+            print(f"¡Éxito! Se han guardado {len(df)} registros reales (producción y consumo) en 'solar_bronze'.")
 
         else:
-            print("⚠️ La API de Fusion Solar no devolvió datos válidos para hoy.")
+            print("La API de Fusion Solar no devolvió datos válidos para hoy.")
 
     except Exception as e:
-        print(f"❌ Error crítico en la ingesta solar: {e}")
+        print(f"Error crítico en la ingesta solar: {e}")
 
 if __name__ == "__main__":
     ingest_solar()
