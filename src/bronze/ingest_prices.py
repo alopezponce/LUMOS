@@ -9,7 +9,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from database_config import engine
 
 def ingest_prices():
-    print(f"[{datetime.now()}] 💰 Iniciando ingesta de precios PVPC (REE Open Data)...")
+    print(f"[{datetime.now()}] Iniciando ingesta de precios PVPC (REE Open Data)...")
 
     fecha_hoy = datetime.now().strftime('%Y-%m-%d')
     
@@ -41,12 +41,12 @@ def ingest_prices():
             # GUARDADO EN POSTGRESQL
             df.to_sql('precios_bronze', engine, if_exists='append', index=False)
 
-            print(f"✅ ¡Éxito! Se han guardado {len(df)} precios en 'precios_bronze'.")
+            print(f"¡Éxito! Se han guardado {len(df)} precios en 'precios_bronze'.")
         else:
-            print("⚠️ La API de REE no devolvió valores de PVPC para hoy.")
+            print("La API de REE no devolvió valores de PVPC para hoy.")
 
     except Exception as e:
-        print(f"❌ Error en la ingesta de precios: {e}")
+        print(f"Error en la ingesta de precios: {e}")
 
 if __name__ == "__main__":
     ingest_prices()
