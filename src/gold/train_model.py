@@ -46,12 +46,12 @@ def train_solar_model():
     X = df_clean[features_top]
     y = df_clean['production_kw']
     
-    print("⚖️ Escalando datos...")
+    print(" Escalando datos...")
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(X)
     X_rnn = X_scaled.reshape((X_scaled.shape[0], 1, X_scaled.shape[1]))
     
-    print("🧠 Entrenando red neuronal LSTM...")
+    print("Entrenando red neuronal LSTM...")
     model = tf.keras.models.Sequential([
         tf.keras.layers.LSTM(32, activation='relu', input_shape=(1, len(features_top))),
         tf.keras.layers.Dropout(0.1),
