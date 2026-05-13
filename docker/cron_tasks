@@ -1,8 +1,0 @@
-# Ejecutar ingesta de Meteo y Precios cada día a las 21:30
-30 21 * * * python /app/src/bronze/ingest_meteo.py >> /app/data/bronze/meteo.log 2>&1
-31 21 * * * python /app/src/bronze/ingest_prices.py >> /app/data/bronze/prices.log 2>&1
-
-# Ejecutar ingesta de Fusion Solar cada día a las 23:55 (Cierre del día)
-55 23 * * * python /app/src/bronze/ingest_solar.py >> /app/data/bronze/solar.log 2>&1
-
-# Importante: Deja una línea vacía aquí debajo
