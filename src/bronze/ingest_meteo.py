@@ -9,7 +9,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from database_config import engine
 
 def ingest_meteo():
-    print(f"[{datetime.now()}] ☁️ Iniciando ingesta de Meteo en DB...")
+    print(f"[{datetime.now()}]  Iniciando ingesta de Meteo en DB...")
 
     # Coordenadas de Calella
     lat, lon = 41.67, 2.78
@@ -42,12 +42,12 @@ def ingest_meteo():
             # --- GUARDADO EN POSTGRESQL ---
             df.to_sql('meteo_bronze', engine, if_exists='append', index=False)
 
-            print(f"✅ ¡Éxito! Se han guardado {len(df)} horas completas en la tabla 'meteo_bronze'.")
+            print(f" ¡Éxito! Se han guardado {len(df)} horas completas en la tabla 'meteo_bronze'.")
         else:
-            print("⚠️ La API no devolvió datos horarios.")
+            print(" La API no devolvió datos horarios.")
 
     except Exception as e:
-        print(f"❌ Error crítico en la ingesta de Meteo: {e}")
+        print(f" Error crítico en la ingesta de Meteo: {e}")
 
 if __name__ == "__main__":
     ingest_meteo()
