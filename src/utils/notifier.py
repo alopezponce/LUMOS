@@ -20,10 +20,10 @@ def comprobar_estado_bronce(tabla):
         df = pd.read_sql(query, engine)
         
         if df.iloc[0, 0] > 0:
-            return "✅ Datos guardados"
-        return "❌ No encontrado"
+            return " Datos guardados"
+        return "No encontrado"
     except Exception:
-        return "⚠️ Error SQL"
+        return " Error SQL"
 
 def obtener_conteo_silver():
     try:
@@ -57,9 +57,9 @@ def enviar_reporte():
 
     try:
         bot.send_message(CHAT_ID, mensaje, parse_mode='Markdown')
-        print("✅ Reporte final enviado correctamente.")
+        print("Reporte final enviado correctamente.")
     except Exception as e:
-        print(f"❌ Error al enviar mensaje: {e}")
+        print(f" Error al enviar mensaje: {e}")
 
 if __name__ == "__main__":
     enviar_reporte()
