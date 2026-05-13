@@ -7,14 +7,14 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from database_config import engine
 
 def process_silver():
-    print(f"[{datetime.now()}] 🥈 Iniciando proceso ETL de Bronze a Silver...")
+    print(f"[{datetime.now()}]  Iniciando proceso ETL de Bronze a Silver...")
     try:
         # 1. SALVAGUARDIA: Leer el histórico que ya existe en Silver para NO PERDERLO
         try:
             df_silver_historico = pd.read_sql("SELECT * FROM master_silver", engine)
             df_silver_historico['timestamp'] = pd.to_datetime(df_silver_historico['timestamp'], utc=True)
         except:
-            print("⚠️ No se encontró histórico en Silver. Se creará desde cero.")
+            print("No se encontró histórico en Silver. Se creará desde cero.")
             df_silver_historico = pd.DataFrame()
 
         # 2. Leer lo nuevo de las tablas Bronze
@@ -56,10 +56,10 @@ def process_silver():
         df_final = df_final.sort_values('timestamp').reset_index(drop=True)
         df_final.to_sql('master_silver', engine, if_exists='replace', index=False)
 
-        print(f"✅ ¡Éxito! Master_silver actualizada de forma segura. Total de filas ahora: {len(df_final)}")
+        print(f"¡Éxito! Master_silver actualizada de forma segura. Total de filas ahora: {len(df_final)}")
 
     except Exception as e:
-        print(f"❌ Error crítico en process_silver: {e}")
+        print(f"Error crítico en process_silver: {e}")
 
 if __name__ == "__main__":
     process_silver()
