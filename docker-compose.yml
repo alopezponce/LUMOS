@@ -1,0 +1,45 @@
+services:
+  # CONTENEDOR 1: La Base de Datos (Persistencia)
+  ia_sol_db:
+    image: postgres:15
+    container_name: ia_sol_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - ia_sol_network
+
+  # CONTENEDOR 2: Ejecución de Scripts (Lógica)
+  ia_sol_pipeline:
+    build:
+      context: .
+      dockerfile: docker/ingestor.Dockerfile
+    container_name: ia_sol_pipeline
+    restart: always
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    ports:                 # 👈 MAGIA AQUÍ: Abrimos el puerto para la web MLOps
+      - "8501:8501"
+    command: sh -c "cron && python -m streamlit run app/dashboard.py --server.port=8501 --server.address=0.0.0.0"
+    depends_on:
+      - ia_sol_db
+    networks:
+      - ia_sol_network
+    tty: true
+    stdin_open: true
+
+# Definición de recursos compartidos
+volumes:
+  postgres_data: # Este volumen sobrevive aunque borres los dockers
+
+networks:
+  ia_sol_network:
+    driver: bridge

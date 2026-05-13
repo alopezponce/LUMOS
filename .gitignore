@@ -1,0 +1,17 @@
+# Variables de entorno (¡CRÍTICO!)
+.env
+
+# Entornos virtuales y caché de Python
+__pycache__/
+*.pyc
+venv/
+env/
+
+# Datos y modelos pesados (opcional, por si no quieres subir la DB)
+*.db
+*.keras
+*.pkl
+
+# Logs del sistema
+logs/
+*.log
