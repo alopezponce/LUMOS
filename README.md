@@ -1,4 +1,4 @@
-# ☀️ IA_SOL: Centro de Control Energético (Solar MLOps)
+# ☀️ LUMOS: Centro de Control Energético 
 
 Este repositorio contiene el código fuente del proyecto "IA_SOL", desarrollado como trabajo final para el curso de especialización en Inteligencia Artificial y Big Data. 
 
