@@ -32,5 +32,5 @@ El proyecto está completamente dockerizado para garantizar su reproducibilidad.
 
 1. Clona este repositorio en tu máquina:
    ```bash
-   git clone [https://github.com/alopezponce/IA_SOL.git](https://github.com/alopezponce/LUMOS.git)
+   git clone [https://github.com/alopezponce/LUMOS.git](https://github.com/alopezponce/LUMOS.git)
    cd LUMOS
