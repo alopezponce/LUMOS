@@ -19,7 +19,7 @@
 
 ## 📂 Estructura del Proyecto
 
-La estructura del repositorio refleja la arquitectura de datos del sistema, excluyendo logs y archivos temporales de desarrollo:
+La estructura del repositorio refleja la arquitectura de datos del sistema, manteniendo el entorno limpio para entornos de producción:
 
 ```text
 LUMOS/
@@ -30,7 +30,7 @@ LUMOS/
 ├── data/
 │   └── bronze/                   # Almacenamiento local temporal de descargas CSV
 ├── docker/
-│   └── ingestor.Dockerfile       # Imagen para contenedores de ingesta ETL
+│   └── ingestor.Dockerfile       # Imagen base con Python y dependencias para el ETL
 ├── models/
 │   ├── accuracy.txt              # Registro de la métrica R² actual
 │   ├── scaler.pkl                # Escalador de variables (Imprescindible para inferencia)
@@ -49,4 +49,45 @@ LUMOS/
 │   └── database_config.py        # Enlace SQLAlchemy con PostgreSQL
 ├── docker-compose.yml            # Orquestación de los servicios
 ├── requirements.txt              # Dependencias de Python
+├── setup_cron.txt                # Documentación de comandos crontab del host
 └── .env.example                  # Plantilla de credenciales y tokens
+
+
+## ⚙️ Automatización ETL (Crontab)
+
+El pipeline de ingesta se ejecuta de forma completamente desatendida mediante trabajos Cron configurados en el host del servidor, disparando los scripts dentro del contenedor Docker:
+
+| Hora | Proceso | Objetivo |
+| :--- | :--- | :--- |
+| **22:30** | `ingest_prices.py` | Obtención de tarifas eléctricas para el día siguiente (D+1). |
+| **23:50** | `ingest_meteo.py` | Recogida de predicciones meteorológicas horarias. |
+| **23:55** | `ingest_solar.py` | Extracción de datos del inversor de la jornada actual. |
+| **00:00** | `process_silver.py`| Transformación, limpieza y subida a la capa analítica. |
+| **00:05** | `notifier.py` | Envío automático del reporte de energía por Telegram. |
+
+## 💻 Instalación y Despliegue
+
+1. **Clonar el repositorio:**
+   ```bash
+   git clone [https://github.com/tu-usuario/lumos.git](https://github.com/tu-usuario/lumos.git)
+   cd lumos
+
+1. **Configurar credenciales:**
+   Renombra el archivo `.env.example` a `.env` e introduce tus claves de acceso a la base de datos, credenciales del inversor y el Token de tu bot de Telegram.
+
+2. **Configurar la automatización (Opcional):**
+   Añade los comandos listados en `setup_cron.txt` a tu archivo crontab local ejecutando `crontab -e`.
+
+3. **Levantar infraestructura:**
+   Ejecuta Docker Compose para construir las imágenes e iniciar tanto la base de datos como los servicios asociados.
+
+   ```bash
+   docker compose up -d --build
+   ```
+
+4. **Acceder al panel de control:**
+   Abre tu navegador web e ingresa a `http://localhost:8501`.
+
+## 👨‍💻 Autor
+
+**Adnan** - Estudiante de la Especialización en Inteligencia Artificial y Big Data.
