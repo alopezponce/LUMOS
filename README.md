@@ -51,7 +51,7 @@ LUMOS/
 ├── requirements.txt              # Dependencias de Python
 ├── setup_cron.txt                # Documentación de comandos crontab del host
 └── .env.example                  # Plantilla de credenciales y tokens
-
+ ```
 
 ## ⚙️ Automatización ETL (Crontab)
 
@@ -90,4 +90,4 @@ El pipeline de ingesta se ejecuta de forma completamente desatendida mediante tr
 
 ## 👨‍💻 Autor
 
-**Adnan** - Estudiante de la Especialización en Inteligencia Artificial y Big Data.
+**Adrià** - Estudiante de la Especialización en Inteligencia Artificial y Big Data.
