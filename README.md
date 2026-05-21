@@ -72,11 +72,8 @@ El pipeline de ingesta se ejecuta de forma completamente desatendida mediante tr
    git clone [https://github.com/tu-usuario/lumos.git](https://github.com/tu-usuario/lumos.git)
    cd lumos
 
-1. **Configurar credenciales:**
+2. **Configurar credenciales:**
    Renombra el archivo `.env.example` a `.env` e introduce tus claves de acceso a la base de datos, credenciales del inversor y el Token de tu bot de Telegram.
-
-2. **Configurar la automatización (Opcional):**
-   Añade los comandos listados en `setup_cron.txt` a tu archivo crontab local ejecutando `crontab -e`.
 
 3. **Levantar infraestructura:**
    Ejecuta Docker Compose para construir las imágenes e iniciar tanto la base de datos como los servicios asociados.
