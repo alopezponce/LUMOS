@@ -9,16 +9,20 @@ import urllib.request
 import json
 import numpy as np
 import joblib
+from dotenv import load_dotenv
 
-# Silenciar warnings de TensorFlow en la consola
+# 1. Cargar entorno y silenciar warnings
+load_dotenv()
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import tensorflow as tf
 
-# Configuración de página
 st.set_page_config(page_title="Centro de Control Energético", layout="wide", page_icon="☀️")
 
-# Cargar configuración de base de datos
-base_dir = os.path.dirname(os.path.abspath(__file__))
+try:
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+except NameError:
+    base_dir = os.getcwd()
+
 sys.path.append(os.path.abspath(os.path.join(base_dir, '..')))
 from src.database_config import engine
 
@@ -31,7 +35,6 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# --- INICIALIZAR MEMORIA DE APARATOS ---
 if 'mis_aparatos' not in st.session_state:
     st.session_state.mis_aparatos = {
         "Lavadora estándar": {"kW": 1.5, "horas": 1.5},
@@ -42,10 +45,8 @@ if 'mis_aparatos' not in st.session_state:
         "Aire Acondicionado": {"kW": 1.0, "horas": 3.0}
     }
 
-# --- CARGA DE DATOS E IA ---
 @st.cache_resource
 def load_ml_model():
-    """Carga el modelo LSTM y el escalador entrenados en la capa Gold"""
     try:
         models_dir = os.path.abspath(os.path.join(base_dir, '../models'))
         model = tf.keras.models.load_model(os.path.join(models_dir, 'solar_lstm.keras'))
@@ -149,14 +150,12 @@ def get_weather_hourly_features(fecha_objetivo):
     except:
         return pd.DataFrame()
 
-# Instanciar componentes globales
 modelo_lstm, escalador, acc_r2 = load_ml_model()
 df_bronze_full = load_solar_data()
 df_silver_full = load_silver_data()
 filas_silver = get_silver_rows()
 calculo_mae = calcular_mae_global(modelo_lstm, escalador, df_silver_full)
 
-# --- SIDEBAR ---
 ruta_logo = os.path.join(base_dir, 'assets', 'logo.png')
 try:
     if os.path.exists(ruta_logo):
@@ -196,22 +195,17 @@ with st.sidebar:
             else:
                 st.error("❌ Error en el entrenamiento.")
 
-# --- CUERPO PRINCIPAL ---
 st.title("Centro de Control Energético ☀️")
 
 col_f1, col_f2 = st.columns([2, 5])
 with col_f1:
     fecha_sel = st.date_input("Día de análisis", datetime.now() - timedelta(days=1))
 
-# Datos reales de AYER (para la Pestaña 1)
 df_bronze_day = df_bronze_full[df_bronze_full['timestamp'].dt.date == fecha_sel].sort_values('timestamp')
 
-# =========================================================================
-# NUEVO: LÓGICA DE PREDICCIÓN GLOBAL PARA MAÑANA (Usada en Pestañas 2 y 4)
-# =========================================================================
 fecha_objetivo = fecha_sel + timedelta(days=1)
 estado_clima, color_borde, bg_color, msj = get_weather_forecast(fecha_objetivo)
-df_pred = pd.DataFrame() # Creamos un df_pred vacío por defecto
+df_pred = pd.DataFrame()
 
 if not df_bronze_day.empty and modelo_lstm is not None and escalador is not None:
     df_weather_tomorrow = get_weather_hourly_features(fecha_objetivo)
@@ -235,12 +229,8 @@ if not df_bronze_day.empty and modelo_lstm is not None and escalador is not None
             'production_kw': np.clip(predicciones, 0, None)
         })
 
-# --- PESTAÑAS ---
 tab1, tab2, tab3, tab4 = st.tabs(["📊 Día de ayer", "🧠 Predicción Futura (IA)", "🗄️ Base de Datos", "💡 Planificador Inteligente"])
 
-# ==========================================
-# PESTAÑA 1: DÍA DE AYER
-# ==========================================
 with tab1:
     if not df_bronze_day.empty:
         m1, m2, m3, m4 = st.columns(4)
@@ -264,12 +254,8 @@ with tab1:
     else:
         st.warning(f"No hay datos registrados para el día seleccionado.")
 
-# ==========================================
-# PESTAÑA 2: PREDICCIÓN FUTURA (INFERENCIA REAL LSTM)
-# ==========================================
 with tab2:
     st.subheader("🧠 Previsión Real de Red Neuronal LSTM (Próximas 24h)")
-
     if not df_pred.empty:
         st.markdown(f"#### 📡 Ejecutando Inferencia. Clima mañana: **{estado_clima}**")
 
@@ -282,13 +268,13 @@ with tab2:
         hores_dorades_df = df_pred[df_pred['production_kw'] >= llindar_dorat]
 
         if pic_kw < 0.5:
-            text_dorat = "Producció insuficient"
+            text_dorat = "Producción insuficiente"
         elif not hores_dorades_df.empty:
             inici_dorat = hores_dorades_df['timestamp'].min().strftime("%H:%M")
             fi_dorat = hores_dorades_df['timestamp'].max().strftime("%H:%M")
             text_dorat = f"De {inici_dorat} a {fi_dorat}"
         else:
-            text_dorat = "Sense franja clara"
+            text_dorat = "Sin franja clara"
 
         st.markdown(f"""
         <div class="golden-card" style="background-color: {bg_color}; border-left: 5px solid {color_borde};">
@@ -297,8 +283,8 @@ with tab2:
         """, unsafe_allow_html=True)
 
         c1, c2, c3 = st.columns(3)
-        c1.metric("⚡ Energia Total Estimada", f"{energia_estimada:.2f} kWh")
-        c2.metric("☀️ Pic Màxim de Potència", f"{pic_kw:.2f} kW", f"A les {pic_hora}", delta_color="off")
+        c1.metric("⚡ Energía Total Estimada", f"{energia_estimada:.2f} kWh")
+        c2.metric("☀️ Pico Máximo de Potencia", f"{pic_kw:.2f} kW", f"A las {pic_hora}", delta_color="off")
         c3.metric("⏱️ Horas Doradas", text_dorat)
 
         fig2 = go.Figure()
@@ -312,9 +298,6 @@ with tab2:
     else:
         st.warning("⚠️ No se pudo generar la predicción. Comprueba si el modelo está entrenado y hay datos del clima disponibles.")
 
-# ==========================================
-# PESTAÑA 3: EXPLORADOR MEDALLIÓN
-# ==========================================
 with tab3:
     st.subheader("🗄️ Explorador de Arquitectura de Datos")
     subtab1, subtab2 = st.tabs(["🥉 Capa Bronze (Día Seleccionado)", "🥈 Capa Silver (Histórico Completo)"])
@@ -333,9 +316,6 @@ with tab3:
         else:
             st.info("La capa Silver aún no se ha generado o está vacía.")
 
-# ==========================================
-# PESTAÑA 4: PLANIFICADOR DE CARGAS
-# ==========================================
 with tab4:
     st.subheader("💡 Planificador Inteligente de Cargas (Para Mañana)")
 
@@ -377,7 +357,6 @@ with tab4:
     seleccion = st.multiselect("¿Qué aparatos necesitas encender hoy?", opciones, default=[opciones[0]] if opciones else [])
 
     if seleccion:
-        # AHORA UTILIZAMOS df_pred (LA PREDICCIÓN) EN LUGAR DE df_bronze_day
         if not df_pred.empty:
             df_hora = df_pred.copy()
             df_hora['hora'] = df_hora['timestamp'].dt.hour
@@ -480,7 +459,6 @@ with tab4:
                 fig4 = go.Figure()
                 base_date = df_pred['timestamp'].dt.date.iloc[0].strftime('%Y-%m-%d')
 
-                # GRAFICAR LA PREDICCIÓN DE LA IA (No la del día de ayer)
                 fig4.add_trace(go.Scatter(
                     x=df_pred['timestamp'],
                     y=df_pred['production_kw'],
@@ -517,4 +495,3 @@ with tab4:
                 st.plotly_chart(fig4, use_container_width=True)
         else:
             st.error("❌ No se puede generar el planificador. Asegúrate de que el modelo de IA está entrenado y que hay previsión del clima disponible para generar la curva de mañana.")
-iabd@ceiabd-03:~/proyectov2/app$
