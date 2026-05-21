@@ -49,7 +49,6 @@ LUMOS/
 │   └── database_config.py        # Enlace SQLAlchemy con PostgreSQL
 ├── docker-compose.yml            # Orquestación de los servicios
 ├── requirements.txt              # Dependencias de Python
-├── setup_cron.txt                # Documentación de comandos crontab del host
 └── .env.example                  # Plantilla de credenciales y tokens
  ```
 
