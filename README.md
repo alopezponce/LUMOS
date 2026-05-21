@@ -1,36 +1,52 @@
-# ☀️ LUMOS: Centro de Control Energético 
+# ☀️ LUMOS - Plataforma Predictiva de Autoconsumo Solar con IA
 
-Este repositorio contiene el código fuente del proyecto "IA_SOL", desarrollado como trabajo final para el curso de especialización en Inteligencia Artificial y Big Data. 
+![Estado](https://img.shields.io/badge/Estado-En_Producción-success)
+![Versión](https://img.shields.io/badge/Versión-1.0-blue)
+![Python](https://img.shields.io/badge/Python-3.11-yellow)
+![TensorFlow](https://img.shields.io/badge/TensorFlow-2.15-orange)
+![Docker](https://img.shields.io/badge/Docker-Ready-2496ED)
 
-El objetivo principal es predecir la producción de energía de una instalación de paneles solares mediante algoritmos de **Deep Learning (LSTM)**, y cruzar esa información con el clima y los precios del mercado eléctrico (PVPC) para optimizar el consumo de los electrodomésticos del hogar mediante un **Algoritmo Voraz**.
+**LUMOS** es un proyecto *End-to-End* de Inteligencia Artificial y Big Data diseñado para monitorizar, predecir y optimizar el consumo energético doméstico. Utilizando datos reales de un inversor solar Huawei SUN2000, predicciones meteorológicas y los precios de la red eléctrica, el sistema recomienda cuándo encender los electrodomésticos para maximizar el ahorro.
 
 ## 🚀 Características Principales
 
-* **Pipeline de Ingesta Automática (ETL):** Descarga de datos programada mediante Cronjobs desde 3 APIs distintas: inversor Huawei (Fusion Solar), Open-Meteo y ESIOS (Red Eléctrica de España).
-* **Arquitectura Medallón:** Los datos fluyen estructurados a través de capas lógicas (Bronze, Silver, Gold) dentro de una base de datos relacional robusta.
-* **Modelo Predictivo LSTM:** Red neuronal recurrente entrenada para entender patrones temporales e inercias climáticas, alcanzando una alta precisión en la predicción a 24 horas.
-* **MLOps y Monitorización:** Sistema de reentrenamiento bajo demanda (Retraining) y auditoría diaria automatizada con envío de reportes mediante un Bot de Telegram.
-* **Dashboard Interactivo:** Interfaz web intuitiva para visualizar el histórico, las predicciones y la "Agenda Óptima" de consumo.
+* **Pipeline de Datos Automatizado (ETL):** Ingesta orquestada mediante Cron de datos de producción solar, clima (Open-Meteo) y precios de la electricidad.
+* **Arquitectura Medallón:** Procesamiento estructurado en bases de datos PostgreSQL (Bronze para datos crudos, Silver para datos limpios, Gold para entrenamiento).
+* **Inteligencia Artificial (LSTM):** Red Neuronal Recurrente (LSTM) entrenada con *Feature Engineering* para capturar la inercia del sol, superando el **0.93 de R²** en validación (80/20 split).
+* **MLOps Integrado:** Re-entrenamiento del modelo y actualización dinámica del escalador (`StandardScaler`) en un solo clic desde el entorno de producción.
+* **Dashboard Interactivo:** Interfaz en Streamlit con un **Planificador Inteligente de Cargas** que cruza el consumo base con la curva de producción inferida para las próximas 24 horas.
+* **Sistema de Alertas:** Integración con un Bot de Telegram para el envío diario del pronóstico y resumen de ahorro.
 
-## 🛠️ Stack Tecnológico
+## 📂 Estructura del Proyecto
 
-* **Lenguaje:** Python 3.10
-* **Infraestructura:** Docker & Docker Compose
-* **Base de Datos:** PostgreSQL
-* **Machine Learning:** TensorFlow / Keras, Scikit-Learn
-* **Tratamiento de Datos:** Pandas, Numpy
-* **Frontend:** Streamlit, Plotly
-* **Automatización:** Linux Cron, pyTelegramBotAPI
+La estructura del repositorio refleja la arquitectura de datos del sistema, excluyendo logs y archivos temporales de desarrollo:
 
-## ⚙️ Arquitectura del Sistema
-
-El proyecto está completamente dockerizado para garantizar su reproducibilidad. Se divide en dos contenedores principales:
-1.  `db`: Servidor PostgreSQL que almacena las capas Bronze y Silver.
-2.  `app`: Contenedor principal que ejecuta los scripts de ingesta, el preprocesamiento, el entrenamiento del modelo y levanta la interfaz web de Streamlit.
-
-## 📥 Instalación y Despliegue Local
-
-1. Clona este repositorio en tu máquina:
-   ```bash
-   git clone [https://github.com/alopezponce/LUMOS.git](https://github.com/alopezponce/LUMOS.git)
-   cd LUMOS
+```text
+LUMOS/
+├── app/
+│   ├── assets/
+│   │   └── logo.png              # Logo del Dashboard
+│   └── dashboard.py              # Interfaz web principal (Streamlit)
+├── data/
+│   └── bronze/                   # Almacenamiento local temporal de descargas CSV
+├── docker/
+│   └── ingestor.Dockerfile       # Imagen para contenedores de ingesta ETL
+├── models/
+│   ├── accuracy.txt              # Registro de la métrica R² actual
+│   ├── scaler.pkl                # Escalador de variables (Imprescindible para inferencia)
+│   └── solar_lstm.keras          # Modelo de Red Neuronal en producción
+├── src/
+│   ├── bronze/                   # Capa 1: Extracción de orígenes
+│   │   ├── ingest_meteo.py       # Conexión API Open-Meteo
+│   │   ├── ingest_prices.py      # Conexión API Mercado Eléctrico
+│   │   └── ingest_solar.py       # Conexión y parseo inversor Huawei
+│   ├── silver/                   # Capa 2: Transformación
+│   │   └── process_silver.py     # Limpieza, unificación y Feature Engineering
+│   ├── gold/                     # Capa 3: Machine Learning
+│   │   └── train_model.py        # Algoritmo de entrenamiento y MLOps
+│   ├── utils/
+│   │   └── notifier.py           # Gestión del Bot de Telegram
+│   └── database_config.py        # Enlace SQLAlchemy con PostgreSQL
+├── docker-compose.yml            # Orquestación de los servicios
+├── requirements.txt              # Dependencias de Python
+└── .env.example                  # Plantilla de credenciales y tokens
